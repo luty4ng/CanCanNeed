@@ -1,0 +1,109 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+# Unity项目 .cursorignore 文件
+# 忽略Unity生成的临时文件和构建文件，提高Cursor索引效率
+
+# Unity生成的临时目录
+Library/
+Temp/
+Logs/
+obj/
+UserSettings/
+
+# Unity构建输出
+Builds/
+Bundles/
+
+# Unity项目设置和元数据
+ProjectSettings/
+*.csproj
+*.sln
+*.DotSettings.user
+*.DotSettings
+
+
+# Unity场景文件（可选，如果不需要索引场景文件）
+*.unity
+
+# Unity预制体文件（可选，如果不需要索引预制体文件）
+*.prefab
+
+# Unity材质和着色器文件（可选，如果不需要索引材质文件）
+*.mat
+# *.shader
+
+# Unity动画文件（可选，如果不需要索引动画文件）
+*.anim
+*.controller
+
+# Unity音频文件（可选，如果不需要索引音频文件）
+*.wav
+*.mp3
+*.ogg
+
+# Unity纹理文件（可选，如果不需要索引纹理文件）
+*.png
+*.jpg
+*.jpeg
+*.tga
+*.tiff
+*.psd
+
+# Unity模型文件（可选，如果不需要索引模型文件）
+*.fbx
+*.obj
+*.dae
+*.3ds
+
+# Unity压缩包
+*.unitypackage
+
+# Unity崩溃报告
+crashlytics-build.properties
+
+# Unity Hub相关
+*.hub
+
+# 版本控制
+.git/
+.svn/
+.hg/
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统生成的文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+*.tmp
+
+# 备份文件
+*.bak
+*.backup
+
+# 压缩文件
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# 文档文件（可选，如果不需要索引文档）
+# *.pdf
+# *.doc
+# *.docx
+# *.txt
+
+# Unity编辑器脚本（可选，如果不需要索引编辑器脚本）
+# Editor/
+
+# Unity StreamingAssets（可选，如果不需要索引流媒体资源）
+StreamingAssets/

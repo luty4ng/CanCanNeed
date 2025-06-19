@@ -1,0 +1,47 @@
+# 项目信息
+# 项目名称: Unity游戏项目
+# 描述: 基于Unity引擎的3D游戏项目
+# 版本: 1.0.0
+# 引擎版本: Unity 2022.3 LTS
+
+# 编码规范
+- 使用PascalCase命名法命名类、方法和属性
+- 使用camelCase命名法命名私有变量和参数
+- 私有字段使用m_前缀，如m_privateField
+- 接口名称以I开头，如IInteractable
+- 使用[SerializeField]而非public暴露Inspector中的私有变量
+- 组件引用应在Awake()或Start()中获取并缓存
+- 避免在Update()中进行耗时操作或分配内存
+- 使用C# 8.0+的新特性，如nullable引用类型
+
+# 技术栈
+- 游戏引擎: Unity 2022.3 LTS+
+- 脚本语言: C# 9.0+
+- UI框架: Unity UI (UGUI)
+- 物理系统: Unity Physics
+- 动画系统: Animator与Animation
+- 输入系统: Unity新输入系统(Input System)
+- 版本控制: Git
+- 依赖管理: Unity Package Manager
+
+# 开发流程
+- 使用Unity Test Framework进行单元测试
+- 场景加载使用SceneManager异步加载
+- 使用对象池模式处理频繁创建和销毁的对象
+- 使用ScriptableObject存储配置数据
+- 性能优化目标：移动设备60FPS，PC/主机平台120FPS
+- 使用Unity Profiler定期检查性能瓶颈
+- 对于大型资源，使用Addressables系统进行管理
+- 遵循SOLID原则设计类和系统
+- 使用事件系统或观察者模式实现松耦合通信
+
+# 错误与文档
+- 使用Debug.Log系列方法记录不同级别的日志
+- 在生产版本中禁用Debug日志
+- 使用try-catch处理可预见的异常
+- 每个脚本文件顶部添加XML文档注释说明其用途
+- 复杂方法添加XML文档注释说明参数和返回值
+- 创建README.md文档说明系统架构和使用方法
+- 使用DrawGizmos辅助可视化调试
+- 自定义编辑器工具需添加使用说明
+- 使用Conditional特性区分调试和发布功能
