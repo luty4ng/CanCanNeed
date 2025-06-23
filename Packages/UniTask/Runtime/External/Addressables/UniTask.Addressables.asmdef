@@ -3,7 +3,8 @@
     "references": [
         "UniTask",
         "Unity.ResourceManager",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "YooAsset"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

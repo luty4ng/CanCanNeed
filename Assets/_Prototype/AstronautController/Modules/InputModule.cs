@@ -57,7 +57,8 @@ namespace PlayerController.Modules
             
             // 检测同步请求 (空格键用于同步速度)
             Data.isSyncRequested = Input.GetKey(KeyCode.Space) && Data.currentTarget != null;
-            Data.isStabilizeRequested = Input.GetKey(KeyCode.Space);
+            Data.isStabilizeRequested = Input.GetKey(KeyCode.Space) && !Data.isOnGround;
+            Data.isJumpingRequested = Input.GetKey(KeyCode.Space) && Data.isOnGround && Data.isInGravityField;
         }
         
         public override void OnDestroy()

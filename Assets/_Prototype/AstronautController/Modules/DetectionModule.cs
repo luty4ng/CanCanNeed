@@ -12,8 +12,6 @@ namespace PlayerController.Modules.Gravity
     {
         private bool m_WasInGravityField;
         private bool m_WasOnGround;
-        private GravitySource m_CurrentGravitySource;
-        private GravityPlate m_ActivePlate;
 
         /// <summary>
         /// 初始化检测模块
@@ -24,8 +22,6 @@ namespace PlayerController.Modules.Gravity
             base.Initialize(data);
             m_WasInGravityField = false;
             m_WasOnGround = false;
-            m_CurrentGravitySource = null;
-            m_ActivePlate = null;
             GravityPlate.OnPlayerEnterPlate += HandlePlateEnter;
             GravityPlate.OnPlayerExitPlate += HandlePlateExit;
         }
@@ -35,7 +31,6 @@ namespace PlayerController.Modules.Gravity
         /// </summary>
         public void SetGravity(UnityEngine.Object source, Vector3 direction, float strength)
         {
-            m_CurrentGravitySource = source as GravitySource;
             Data.isInGravityField = true;
             Data.gravityDirection = direction;
             Data.gravityStrength = strength;
@@ -47,14 +42,10 @@ namespace PlayerController.Modules.Gravity
         /// </summary>
         public void ClearGravity(UnityEngine.Object source)
         {
-            if ((object)m_CurrentGravitySource == (object)source)
-            {
-                m_CurrentGravitySource = null;
-                Data.isInGravityField = false;
-                Data.gravityDirection = Vector3.down;
-                Data.gravityStrength = 0f;
-                Data.gravitySource = null;
-            }
+            Data.isInGravityField = false;
+            Data.gravityDirection = Vector3.down;
+            Data.gravityStrength = 0f;
+            Data.gravitySource = null;
         }
 
         /// <summary>
@@ -64,7 +55,6 @@ namespace PlayerController.Modules.Gravity
         {
             if (plate != null && plate.IsActive)
             {
-                m_ActivePlate = plate;
                 SetGravity(plate, plate.GravityDirection, plate.GravityStrength);
             }
         }
@@ -74,9 +64,8 @@ namespace PlayerController.Modules.Gravity
         /// </summary>
         public void ExitPlateGravity(GravityPlate plate)
         {
-            if (m_ActivePlate == plate)
+            if (plate != null && plate.IsActive)
             {
-                m_ActivePlate = null;
                 ClearGravity(plate);
             }
         }
