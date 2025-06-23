@@ -57,14 +57,14 @@ Material:
     - _StarColorHue: 0.14
     - _StarColorSat: 1.84
     - _StarDataScale: 1
-    - _StarDensity: 200
+    - _StarDensity: 100
     - _StarDensity1: 51
     - _StarDensity2: 42.3
     - _StarDensity3: 40
     - _StarGlow: 0.1
     - _StarLength: 0.0176
     - _StarMoveSpeed: 0.1
-    - _StarSize: 1.97
+    - _StarSize: 0.0341
     - _StarSize1: 0.02
     - _StarSize2: 0.005
     - _StarSize3: 0.002
@@ -73,7 +73,7 @@ Material:
     - _StarSpeed2: 0.05
     - _StarSpeed3: 0.02
     - _StarTwinkleAmount: 1
-    - _StarTwinkleSpeed: 10
+    - _StarTwinkleSpeed: 0
     - _TimeScale: 0.86
     - _TwinkleIntensity: 0.3
     - _TwinkleSpeed: 1

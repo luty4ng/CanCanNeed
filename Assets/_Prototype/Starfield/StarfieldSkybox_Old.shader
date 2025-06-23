@@ -1,8 +1,8 @@
-Shader "CosmosTech/Starfield"
+Shader "CosmosTech/StarfieldSkybox_Old"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        // 与上述着色器相同的属性
         _StarDensity ("Star Density", Range(0.01, 100)) = 10
         _StarSize ("Star Size", Range(0.001, 0.1)) = 0.01
         _StarColor ("Star Color", Color) = (1,1,1,1)
@@ -13,12 +13,14 @@ Shader "CosmosTech/Starfield"
     
     SubShader
     {
-        Tags { "RenderType"="Opaque" "RenderPipeline"="UniversalPipeline" }
+        Tags { "RenderType"="Background" "Queue"="Background" "RenderPipeline"="UniversalPipeline" }
         LOD 100
         
         Pass
         {
-            Name "Starfield"
+            Name "StarfieldSkybox"
+            Cull Off
+            ZWrite Off
             
             HLSLPROGRAM
             #pragma vertex vert
@@ -29,20 +31,15 @@ Shader "CosmosTech/Starfield"
             struct Attributes
             {
                 float4 positionOS : POSITION;
-                float2 uv : TEXCOORD0;
             };
             
             struct Varyings
             {
-                float2 uv : TEXCOORD0;
                 float4 positionHCS : SV_POSITION;
+                float3 viewDir : TEXCOORD0;
             };
             
-            TEXTURE2D(_MainTex);
-            SAMPLER(sampler_MainTex);
-            
             CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
                 float _StarDensity;
                 float _StarSize;
                 float4 _StarColor;
@@ -51,25 +48,22 @@ Shader "CosmosTech/Starfield"
                 float _StarTwinkleAmount;
             CBUFFER_END
             
-            // 简单的随机函数
+            // 随机函数和噪声函数与前面相同
             float random(float2 st)
             {
                 return frac(sin(dot(st.xy, float2(12.9898, 78.233))) * 43758.5453123);
             }
             
-            // 噪声函数，用于星星闪烁
             float noise(float2 st)
             {
                 float2 i = floor(st);
                 float2 f = frac(st);
                 
-                // 四个角的随机值
                 float a = random(i);
                 float b = random(i + float2(1.0, 0.0));
                 float c = random(i + float2(0.0, 1.0));
                 float d = random(i + float2(1.0, 1.0));
                 
-                // 平滑插值
                 float2 u = f * f * (3.0 - 2.0 * f);
                 
                 return lerp(a, b, u.x) +
@@ -81,14 +75,27 @@ Shader "CosmosTech/Starfield"
             {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-                OUT.uv = TRANSFORM_TEX(IN.uv, _MainTex);
+                OUT.viewDir = normalize(mul((float3x3)unity_ObjectToWorld, IN.positionOS.xyz));
                 return OUT;
+            }
+            
+            // 将3D方向向量转换为2D UV坐标（球形映射）
+            float2 dirToUV(float3 dir)
+            {
+                float2 uv = float2(
+                    atan2(dir.z, dir.x) / (2.0 * PI) + 0.5,
+                    asin(dir.y) / PI + 0.5
+                );
+                return uv;
             }
             
             half4 frag(Varyings IN) : SV_Target
             {
+                // 将视图方向转换为UV坐标
+                float2 uv = dirToUV(normalize(IN.viewDir));
+                
                 // 将UV坐标分成网格
-                float2 gridUV = floor(IN.uv * _StarDensity) / _StarDensity;
+                float2 gridUV = floor(uv * _StarDensity) / _StarDensity;
                 
                 // 为每个网格计算一个随机值
                 float r = random(gridUV);
@@ -99,7 +106,7 @@ Shader "CosmosTech/Starfield"
                 
                 // 计算星星在网格内的位置
                 float2 center = gridUV + 0.5 / _StarDensity;
-                float dist = distance(IN.uv, center);
+                float dist = distance(uv, center);
                 
                 // 只在距离小于星星大小的地方显示星星
                 star *= (dist < _StarSize / (_StarDensity * 2.0)) ? 1.0 : 0.0;
