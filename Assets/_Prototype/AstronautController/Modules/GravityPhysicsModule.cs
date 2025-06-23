@@ -15,6 +15,11 @@ namespace PlayerController.Modules.Gravity
         private float m_GravityTransitionTimer;
         private bool m_IsTransitioningGravity;
         private bool m_WasInGravityField;
+        private bool m_WasOnGround;
+        
+        // 新增：用于平滑旋转的变量
+        private Quaternion m_InitialRotation;
+        private Quaternion m_TargetRotation;
 
         /// <summary>
         /// 初始化重力物理模块
@@ -28,6 +33,7 @@ namespace PlayerController.Modules.Gravity
             m_GravityTransitionTimer = 0f;
             m_IsTransitioningGravity = false;
             m_WasInGravityField = false;
+            m_WasOnGround = false;
             ApplySpacePhysics();
         }
 
@@ -133,31 +139,17 @@ namespace PlayerController.Modules.Gravity
         /// </summary>
         private void UpdateGravityTransition()
         {
-            if (Data.isInGravityField != m_WasInGravityField)
+            if (Data.isOnGround != m_WasOnGround)
             {
-                if (Data.isInGravityField)
-                {
+                if (Data.isInGravityField && Data.isOnGround)
                     StartGravityTransition();
-                }
-                else
-                {
-                    EndGravityTransition();
-                }
-                m_WasInGravityField = Data.isInGravityField;
+                m_WasOnGround = Data.isOnGround;
             }
             
             if (m_IsTransitioningGravity)
             {
                 m_GravityTransitionTimer += Time.fixedDeltaTime;
-                float progress = m_GravityTransitionTimer / Data.gravityTransitionTime;
-                if (progress >= 1f)
-                {
-                    EndGravityTransition();
-                }
-                else
-                {
-                    SmoothGravityTransition(progress);
-                }
+                PerformGravityTransition(m_GravityTransitionTimer / Data.gravityTransitionTime);
             }
         }
 
@@ -168,6 +160,10 @@ namespace PlayerController.Modules.Gravity
         {
             m_IsTransitioningGravity = true;
             m_GravityTransitionTimer = 0f;
+            // 新增：记录初始和目标旋转
+            m_InitialRotation = Data.rb.transform.rotation;
+            // 目标旋转：将角色up方向对齐到当前重力反方向
+            m_TargetRotation = Quaternion.FromToRotation(Data.transform.up, -Data.gravityDirection) * Data.transform.rotation;
             AstronautEvents.TriggerGravityTransitionStarted();
         }
 
@@ -185,8 +181,13 @@ namespace PlayerController.Modules.Gravity
         /// 平滑重力过渡
         /// </summary>
         /// <param name="progress">过渡进度(0-1)</param>
-        private void SmoothGravityTransition(float progress)
+        private void PerformGravityTransition(float progress)
         {
+            if (progress >= 1f)
+            {
+                EndGravityTransition();
+                return;
+            }
             float smoothProgress = Mathf.SmoothStep(0f, 1f, progress);
             if (Data.isInGravityField)
             {
@@ -198,6 +199,8 @@ namespace PlayerController.Modules.Gravity
                 Data.rb.drag = Mathf.Lerp(Data.airDrag, 0f, smoothProgress);
                 Data.rb.angularDrag = Mathf.Lerp(Data.airAngularDrag, 0f, smoothProgress);
             }
+            // 新增：平滑插值角色旋转（站姿矫正）
+            Data.rb.transform.rotation = Quaternion.Slerp(m_InitialRotation, m_TargetRotation, smoothProgress);
         }
 
         /// <summary>

@@ -1,7 +1,8 @@
 {
     "name": "UniTask.Editor",
     "references": [
-        "UniTask"
+        "UniTask",
+        "YooAsset"
     ],
     "includePlatforms": [
         "Editor"

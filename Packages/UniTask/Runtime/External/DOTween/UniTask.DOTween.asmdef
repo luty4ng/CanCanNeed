@@ -2,7 +2,8 @@
     "name": "UniTask.DOTween",
     "references": [
         "UniTask",
-        "DOTween.Modules"
+        "DOTween.Modules",
+        "YooAsset"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

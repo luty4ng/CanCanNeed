@@ -75,6 +75,7 @@ public class AstronautData : MonoBehaviour
     public float lastSyncTime;
     public bool isSyncRequested;
     public bool isStabilizeRequested;
+    public bool isJumpingRequested;
     public Vector3 targetVelocity;
     public Transform groundSurface;
     public Vector3 groundNormal = Vector3.up;

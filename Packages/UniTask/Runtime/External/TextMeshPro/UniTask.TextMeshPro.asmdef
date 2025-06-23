@@ -2,7 +2,8 @@
     "name": "UniTask.TextMeshPro",
     "references": [
         "UniTask",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "YooAsset"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

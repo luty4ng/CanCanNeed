@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7618880146260492463}
   - component: {fileID: 48694887764837262}
   - component: {fileID: 4255712457967278936}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 316185610373340822}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.35, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -148,8 +148,7 @@ GameObject:
   - component: {fileID: 5461703285052051691}
   - component: {fileID: 897457867690743306}
   - component: {fileID: 7618249906574605305}
-  - component: {fileID: 7825575742673021554}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Nose
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,29 +220,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &7825575742673021554
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 574396277260835924}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!1 &2264269251380403514
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +231,7 @@ GameObject:
   - component: {fileID: 6011909295507269481}
   - component: {fileID: 2405523964170542551}
   - component: {fileID: 4640806808296357246}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -339,7 +315,7 @@ GameObject:
   - component: {fileID: 5593136664037044552}
   - component: {fileID: 7181810225111768611}
   - component: {fileID: 7546618945578047080}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Astronaut
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -402,28 +378,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfe98f71d57441c19bd81babbc468fe7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thrusterForce: 10
-  maxVelocity: 20
+  playerCamera: {fileID: 0}
+  rb: {fileID: 0}
   rotationSpeed: 100
   rollSpeed: 120
+  thrusterForce: 10
+  maxVelocity: 20
   maxFuel: 100
   fuelConsumptionRate: 1
   maxTargetDistance: 100
   targetLayers:
     serializedVersion: 2
-    m_Bits: 0
-  targetHighlightColor: {r: 1, g: 0, b: 0, a: 1}
+    m_Bits: 55
+  targetHighlightColor: {r: 0, g: 1, b: 0.049153566, a: 1}
   syncCooldown: 2
   syncSpeed: 2
   syncFuelMultiplier: 2
   gravityDetectionDistance: 10
   gravityLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   groundCheckDistance: 1.1
   groundLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
   groundDrag: 1
   groundAngularDrag: 5
   airDrag: 0.1
@@ -431,7 +409,7 @@ MonoBehaviour:
   gravityTransitionTime: 0.5
   walkSpeed: 5
   runSpeed: 8
-  jumpForce: 16
+  jumpForce: 2
   groundAlignmentSpeed: 5
   groundAlignmentThreshold: 0.1
   velocityGizmoColor: {r: 0, g: 0, b: 1, a: 1}
@@ -444,19 +422,19 @@ MonoBehaviour:
   gravityDirection: {x: 0, y: -1, z: 0}
   gravityStrength: 0
   isOnGround: 0
+  isInWater: 0
   currentFuel: 0
   isUsingThrusters: 0
   moveInput: {x: 0, y: 0, z: 0}
   lookInput: {x: 0, y: 0}
   rollInput: 0
-  playerCamera: {fileID: 0}
-  rb: {fileID: 0}
   targetRenderer: {fileID: 0}
   originalMaterial: {fileID: 0}
   originalColor: {r: 0, g: 0, b: 0, a: 0}
   lastSyncTime: 0
   isSyncRequested: 0
   isStabilizeRequested: 0
+  isJumpingRequested: 0
   targetVelocity: {x: 0, y: 0, z: 0}
   groundSurface: {fileID: 0}
   groundNormal: {x: 0, y: 1, z: 0}
@@ -475,44 +453,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 331c27e9d1c400942ababa9349446971, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementModule:
-    thrusterForce: 10
-    maxVelocity: 20
-    rollSpeed: 120
-  fuelModule:
-    maxFuel: 100
-    fuelConsumptionRate: 1
-    syncFuelMultiplier: 2
-  targetingModule:
-    maxTargetDistance: 100
-    targetLayers:
-      serializedVersion: 2
-      m_Bits: 0
-    targetHighlightColor: {r: 1, g: 0, b: 0, a: 1}
-  syncModule:
-    syncCooldown: 2
-    syncSpeed: 2
-  gravityDetectionModule:
-    gravityDetectionDistance: 10
-    gravityLayers:
-      serializedVersion: 2
-      m_Bits: 0
-    groundCheckDistance: 1.1
-    groundLayers:
-      serializedVersion: 2
-      m_Bits: 0
-  gravityPhysicsModule:
-    groundDrag: 1
-    groundAngularDrag: 5
-    airDrag: 0.1
-    airAngularDrag: 0.05
-    gravityTransitionTime: 0.5
-  groundMovementModule:
-    walkSpeed: 5
-    runSpeed: 8
-    jumpForce: 16
-    groundAlignmentSpeed: 5
-    groundAlignmentThreshold: 0.1
   data: {fileID: 7181810225111768611}
 --- !u!1 &6817716942992346157
 GameObject:
@@ -525,7 +465,8 @@ GameObject:
   - component: {fileID: 1535578894442016167}
   - component: {fileID: 7660330271530894667}
   - component: {fileID: 6206614521246678259}
-  m_Layer: 0
+  - component: {fileID: 182718678281097089}
+  m_Layer: 3
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -597,6 +538,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &182718678281097089
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6817716942992346157}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8944226270968499227
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,7 +568,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8295843434322770600}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

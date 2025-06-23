@@ -10,6 +10,7 @@ namespace PlayerController.Modules.MotionStates
         private bool m_isAligningToGround;
         private Quaternion m_targetGroundRotation;
         private RigidbodyConstraints m_originalConstraints;
+        private float m_cameraPitch;
 
         public override string StateName => "GroundMotion";
 
@@ -24,17 +25,21 @@ namespace PlayerController.Modules.MotionStates
             Data.rb.useGravity = true;
             Data.rb.drag = 1f;
             Data.rb.angularDrag = 0.05f;
+            if (Data.playerCamera != null)
+            {
+                m_cameraPitch = Data.playerCamera.transform.localEulerAngles.x;
+            }
         }
 
         protected override void OnStateExit()
         {
             m_isAligningToGround = false;
-            UnlockRotationAxes();
         }
 
         protected override void OnStateUpdate()
         {
             HandleInput();
+            HandleCameraLook();
             HandleGroundAlignment();
             CheckGroundStateChange();
         }
@@ -61,7 +66,7 @@ namespace PlayerController.Modules.MotionStates
                 float currentSpeed = GetCurrentSpeed();
                 Vector3 moveDirection = Data.rb.transform.TransformDirection(moveInput.normalized);
                 Vector3 movement = moveDirection * currentSpeed * Time.fixedDeltaTime;
-                Data.rb.transform.position += movement;
+                Data.transform.position += movement;
 
                 AstronautEvents.TriggerGroundMovement(moveDirection, currentSpeed);
             }
@@ -69,20 +74,17 @@ namespace PlayerController.Modules.MotionStates
 
         private void HandleJump()
         {
-            if (!Data.isInGravityField || !Data.isOnGround) return;
+            // if (!Data.isInGravityField || !Data.isOnGround) return;
 
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
+            if (Data.isJumpingRequested)
                 PerformJump();
-            }
         }
 
         private void PerformJump()
         {
             Vector3 jumpDirection = -Data.gravityDirection;
-            Vector3 jumpForceVector = jumpDirection * Data.jumpForce;
+            Vector3 jumpForceVector = jumpDirection * (Data.jumpForce + Data.gravityStrength);
             Data.rb.AddForce(jumpForceVector, ForceMode.Impulse);
-
             AstronautEvents.TriggerJump(Data.jumpForce);
             Debug.Log($"跳跃! 力度: {Data.jumpForce}");
         }
@@ -123,11 +125,12 @@ namespace PlayerController.Modules.MotionStates
                     Data.groundAlignmentSpeed * Time.deltaTime
                 );
 
-                float angleDifference = Quaternion.Angle(Data.transform.rotation, m_targetGroundRotation);
+                float angleDifference = Quaternion.Angle(Data.rb.transform.rotation, m_targetGroundRotation);
                 if (angleDifference < Data.groundAlignmentThreshold)
                 {
                     Data.rb.transform.rotation = m_targetGroundRotation;
                     m_isAligningToGround = false;
+                    UnlockRotationAxes();
                 }
             }
         }
@@ -169,6 +172,21 @@ namespace PlayerController.Modules.MotionStates
         private void UnlockRotationAxes()
         {
             Data.rb.constraints = m_originalConstraints;
+        }
+
+        private void HandleCameraLook()
+        {
+            if (Data.playerCamera == null) return;
+
+            float yaw = Data.lookInput.x;
+            Data.rb.transform.Rotate(Vector3.up * yaw);
+
+            float pitchDelta = -Data.lookInput.y;
+            m_cameraPitch += pitchDelta;
+            m_cameraPitch = Mathf.Clamp(m_cameraPitch, -80f, 80f);
+
+            Vector3 camEuler = Data.playerCamera.transform.localEulerAngles;
+            Data.playerCamera.transform.localEulerAngles = new Vector3(m_cameraPitch, 0, 0);
         }
     }
 } 
