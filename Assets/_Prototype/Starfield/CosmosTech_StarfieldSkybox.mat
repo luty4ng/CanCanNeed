@@ -29,8 +29,12 @@ Material:
     - _AsteroidSize: 0.003
     - _Brightness: 4.63
     - _CanvasView: 5
+    - _CartoonSteps: 8
+    - _CelShadingSteps: 7.88
     - _Contrast: 1.1
+    - _ContrastBoost: 1.19
     - _DepthFade: 0.51
+    - _EdgeGlow: 2
     - _FadeDistance: 0.79
     - _FlickerSpeed: 0.63
     - _GlowIntensity: 3
@@ -43,27 +47,33 @@ Material:
     - _MinDistance: 0.6
     - _MinStarSize: 0.001
     - _MouseSensitivity: 1.45
-    - _NebulaIntensity: 0.88
+    - _NebulaIntensity: 2
     - _NebulaScale: 1.5
     - _NebulaSpeed: 0.17
     - _NoiseScale: 1.49
-    - _NumLayers: 8.3
+    - _NumLayers: 7.1
+    - _OutlineThickness: 0.032
+    - _OutlineWidth: 0.1
     - _ParallaxStrength: 0.8
     - _PassCount: 4
+    - _PosterizeLevels: 2
     - _RedshiftIntensity: 0.5
+    - _RimLighting: 0.69
     - _RotationSpeed: 0.69
+    - _SaturationBoost: 2.18
     - _Speed: 0.69
-    - _StarColorBrightness: 1.44
-    - _StarColorHue: 0.14
-    - _StarColorSat: 1.84
+    - _StarColorBrightness: 0.48
+    - _StarColorHue: 0.15
+    - _StarColorSat: 0
     - _StarDataScale: 1
     - _StarDensity: 200
     - _StarDensity1: 51
     - _StarDensity2: 42.3
     - _StarDensity3: 40
-    - _StarGlow: 0.1
+    - _StarGlow: 0.78
     - _StarLength: 0.0176
     - _StarMoveSpeed: 0.1
+    - _StarSharpness: 5
     - _StarSize: 1.97
     - _StarSize1: 0.02
     - _StarSize2: 0.005
@@ -74,10 +84,11 @@ Material:
     - _StarSpeed3: 0.02
     - _StarTwinkleAmount: 1
     - _StarTwinkleSpeed: 10
+    - _StylizedStrength: 2
     - _TimeScale: 0.86
     - _TwinkleIntensity: 0.3
     - _TwinkleSpeed: 1
-    - _Velocity: -0.018
+    - _Velocity: 0
     - _VignetteStrength: 0.85
     m_Colors:
     - _AsteroidColor: {r: 0.09999997, g: 0.09999997, b: 0.14999998, a: 1}
@@ -85,6 +96,8 @@ Material:
     - _BackgroundColorBottom: {r: 0.02, g: 0.079999976, b: 0.19999996, a: 1}
     - _BackgroundColorTop: {r: 0.049999982, g: 0.14999998, b: 0.34999996, a: 1}
     - _BaseStarColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BgGradientBottom: {r: 0.02, g: 0.02, b: 0.09999997, a: 1}
+    - _BgGradientTop: {r: 0.09999997, g: 0.049999982, b: 0.19999996, a: 1}
     - _BlueStarColor: {r: 0.7, g: 0.8, b: 1, a: 1}
     - _BlueTint: {r: 0.15592727, g: 0.28932202, b: 0.6792453, a: 1}
     - _MagnitudeRange: {r: -2, g: 8, b: 0, a: 0}
@@ -92,6 +105,7 @@ Material:
     - _MainStarPos: {r: 0.3, g: 0.2, b: 0, a: 0}
     - _NebulaColor1: {r: 0.6415095, g: 0.46226406, b: 1, a: 0.3}
     - _NebulaColor2: {r: 1, g: 0.9779874, b: 0.9824587, a: 0.2}
+    - _OutlineColor: {r: 0.19999996, g: 0.19999996, b: 0.5, a: 1}
     - _RedStarColor: {r: 1, g: 0.7, b: 0.5, a: 1}
     - _RedTint: {r: 0.7, g: 0.39999998, b: 0.29999998, a: 1}
     - _StarColor: {r: 1, g: 1, b: 1, a: 1}

@@ -18,22 +18,15 @@ Shader "CosmosTech/StarfieldSkybox"
         _TwinkleSpeed ("Twinkle Speed", Range(0, 10)) = 1
     }
     
-    SubShader
-    {
-        Tags { 
-            "RenderType"="Background" 
-            "Queue"="Background" 
-            "RenderPipeline"="UniversalPipeline"
-            "PreviewType"="Skybox"
-        }
-        LOD 100
-        
+    SubShader {
+        Tags { "RenderType" = "Background" "Queue" = "Background" }
+
         Pass
         {
             Name "StarField"
             Cull Off
             ZWrite Off
-            ZTest LEqual
+            // ZTest LEqual
             
             HLSLPROGRAM
             #pragma vertex vert
