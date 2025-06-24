@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using PlayerController.Modules;
+using System.Data;
+using System.Net.Security;
 
 namespace PlayerController.Modules
 {
@@ -13,8 +15,6 @@ namespace PlayerController.Modules
     {
         #region 私有字段
         private bool m_IsTargetSelected;
-        private float m_LastTargetCheckTime;
-        private const float TargetCheckInterval = 0.05f; // 目标检测间隔，避免过于频繁的射线检测
         #endregion
 
         #region 自动定向相关字段
@@ -126,12 +126,6 @@ namespace PlayerController.Modules
         /// </summary>
         private void HandleTargeting()
         {
-            if (Time.time - m_LastTargetCheckTime < TargetCheckInterval)
-            {
-                return;
-            }
-            m_LastTargetCheckTime = Time.time;
-
             if (TryDetectTarget(out RaycastHit hit))
             {
                 HandleTargetDetection(hit);
@@ -311,7 +305,7 @@ namespace PlayerController.Modules
         }
 
         /// <summary>
-        /// 自动将相机缓慢对准已选中的目标
+        /// 自动将玩家yaw和相机pitch缓慢对准已选中的目标
         /// </summary>
         private void AutoAimToTarget()
         {
@@ -321,27 +315,42 @@ namespace PlayerController.Modules
                 return;
             }
 
-            Transform camTransform = Data.playerCamera.transform;
             Vector3 targetPos = Data.currentTarget.transform.position;
-            Vector3 dirToTarget = (targetPos - camTransform.position).normalized;
-            if (dirToTarget.sqrMagnitude < 0.0001f)
+            Vector3 playerPos = Data.transform.position;
+            Vector3 dirToTarget = (targetPos - playerPos).normalized;
+
+            // 1. 只调整玩家本体的yaw（Y轴）
+            Vector3 flatDir = new Vector3(dirToTarget.x, 0, dirToTarget.z);
+            if (flatDir.sqrMagnitude > 0.0001f)
             {
-                m_IsAutoAiming = false;
-                return;
+                Quaternion targetYaw = Quaternion.LookRotation(flatDir, Vector3.up);
+                Data.transform.rotation = Quaternion.RotateTowards(
+                    Data.transform.rotation,
+                    targetYaw,
+                    m_AutoAimSpeed * Time.deltaTime * 100f
+                );
             }
 
-            Quaternion targetRotation = Quaternion.LookRotation(dirToTarget, Vector3.up);
-            camTransform.rotation = Quaternion.RotateTowards(
-                camTransform.rotation,
-                targetRotation,
-                m_AutoAimSpeed * Time.deltaTime * 100f // 速度可调
-            );
+            // 2. 只调整相机的pitch（X轴）
+            Transform camTransform = Data.playerCamera.transform;
+            Vector3 localTarget = Data.transform.InverseTransformPoint(targetPos);
+            float targetPitch = Mathf.Atan2(localTarget.y, new Vector2(localTarget.x, localTarget.z).magnitude) * Mathf.Rad2Deg;
+
+            // 取当前pitch
+            Vector3 camEuler = camTransform.localEulerAngles;
+            float currentPitch = camEuler.x;
+            if (currentPitch > 180f) currentPitch -= 360f;
+
+            // 插值到目标pitch
+            float newPitch = Mathf.MoveTowards(currentPitch, targetPitch, m_AutoAimSpeed * Time.deltaTime * 100f);
+            camTransform.localEulerAngles = new Vector3(newPitch, 0, 0);
 
             // 判断是否已基本对准
-            float angle = Quaternion.Angle(camTransform.rotation, targetRotation);
-            if (angle < 0.5f)
+            float yawAngle = Quaternion.Angle(Data.transform.rotation, Quaternion.LookRotation(flatDir, Vector3.up));
+            float pitchAngle = Mathf.Abs(newPitch - targetPitch);
+            if (yawAngle < 0.5f && pitchAngle < 0.5f)
             {
-                camTransform.rotation = targetRotation;
+                camTransform.localEulerAngles = new Vector3(targetPitch, 0, 0);
                 m_IsAutoAiming = false;
             }
         }
@@ -402,7 +411,6 @@ namespace PlayerController.Modules
         private void StopAutoCruise()
         {
             m_IsAutoCruising = false;
-            Data.isAutoCruising = false; // 确保Data状态同步
             m_HasSyncedVelocity = false;
             m_HasAlignedDirection = false;
             m_IsAccelerating = false;
@@ -441,12 +449,12 @@ namespace PlayerController.Modules
                 AlignDirectionToTarget();
             }
             // 阶段3：加速前进
-            else if (!m_IsAccelerating && !m_IsDecelerating)
+            else if (m_IsAccelerating && !m_IsDecelerating)
             {
                 AccelerateToTarget();
             }
             // 阶段4：减速停止
-            else if (m_IsAccelerating)
+            else if (!m_IsAccelerating && m_IsDecelerating)
             {
                 DecelerateToTarget();
             }
@@ -486,7 +494,7 @@ namespace PlayerController.Modules
         private void AlignDirectionToTarget()
         {
             Vector3 directionToTarget = (m_AutoCruiseTargetPosition - Data.transform.position).normalized;
-            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget, Vector3.up);
+            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget, Data.transform.up);
             
             Data.transform.rotation = Quaternion.RotateTowards(
                 Data.transform.rotation,
@@ -510,13 +518,13 @@ namespace PlayerController.Modules
         private void AccelerateToTarget()
         {
             Vector3 directionToTarget = (m_AutoCruiseTargetPosition - Data.transform.position).normalized;
-            
+
             // 计算到目标的距离
             float distanceToTarget = Vector3.Distance(Data.transform.position, m_AutoCruiseTargetPosition);
-            
+
             // 根据距离决定是否开始减速
             float decelerationDistance = (m_AutoCruiseCurrentSpeed * m_AutoCruiseCurrentSpeed) / (2f * Data.autoCruiseDeceleration);
-            
+            // Debug.Log($"距离目标: {distanceToTarget}, 减速距离: {decelerationDistance}");
             if (distanceToTarget <= decelerationDistance)
             {
                 m_IsAccelerating = false;
@@ -529,10 +537,11 @@ namespace PlayerController.Modules
             m_AutoCruiseCurrentSpeed += Data.autoCruiseAcceleration * Time.deltaTime;
             m_AutoCruiseCurrentSpeed = Mathf.Min(m_AutoCruiseCurrentSpeed, Data.autoCruiseSpeed);
             Data.autoCruiseCurrentSpeed = m_AutoCruiseCurrentSpeed; // 同步到Data
-            
+
             // 应用速度
             Data.rb.velocity = directionToTarget * m_AutoCruiseCurrentSpeed;
         }
+
 
         /// <summary>
         /// 减速到目标位置
@@ -550,12 +559,14 @@ namespace PlayerController.Modules
             // 应用速度
             Data.rb.velocity = directionToTarget * m_AutoCruiseCurrentSpeed;
             
+            Debug.Log(m_AutoCruiseCurrentSpeed);
             // 检查是否到达目标位置
-            if (distanceToTarget < 0.5f && m_AutoCruiseCurrentSpeed < 0.1f)
+            if (distanceToTarget < 5f && m_AutoCruiseCurrentSpeed < 0.1f)
             {
                 Data.rb.velocity = Vector3.zero;
                 m_IsDecelerating = false;
                 m_IsAccelerating = false;
+                Data.isAutoCruising = false;
                 Debug.Log("自动巡航完成，已到达目标位置");
             }
         }
