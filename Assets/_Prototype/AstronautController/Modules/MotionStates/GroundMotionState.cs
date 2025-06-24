@@ -74,8 +74,6 @@ namespace PlayerController.Modules.MotionStates
 
         private void HandleJump()
         {
-            // if (!Data.isInGravityField || !Data.isOnGround) return;
-
             if (Data.isJumpingRequested)
                 PerformJump();
         }

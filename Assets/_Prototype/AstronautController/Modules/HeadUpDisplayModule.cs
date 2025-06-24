@@ -67,6 +67,20 @@ namespace PlayerController.Modules
                 }
                 
                 GUI.Label(new Rect(10, 130, 300, 20), "右键点击取消选择");
+                
+                // 显示自动巡航状态
+                if (Data.isAutoCruising)
+                {
+                    GUI.color = Color.cyan;
+                    GUI.Label(new Rect(10, 150, 300, 20), "自动巡航中...");
+                    GUI.Label(new Rect(10, 170, 300, 20), $"巡航速度: {Data.autoCruiseCurrentSpeed:F2} m/s");
+                    GUI.Label(new Rect(10, 190, 300, 20), "按X键停止自动巡航");
+                }
+                else
+                {
+                    GUI.color = Color.white;
+                    GUI.Label(new Rect(10, 150, 300, 20), "按X键开始自动巡航");
+                }
             }
             else
             {
@@ -79,6 +93,7 @@ namespace PlayerController.Modules
             GUI.Label(new Rect(10, Screen.height - 100, 300, 20), "WASD: 移动");
             GUI.Label(new Rect(10, Screen.height - 80, 300, 20), "Shift: 上升 | Ctrl: 下降");
             GUI.Label(new Rect(10, Screen.height - 60, 300, 20), "R+鼠标: 视线轴旋转");
+            GUI.Label(new Rect(10, Screen.height - 40, 300, 20), "F: 自动对准 | X: 自动巡航");
         }
     }
 }

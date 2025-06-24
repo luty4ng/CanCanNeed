@@ -24,6 +24,13 @@ public class AstronautData : MonoBehaviour
     public LayerMask targetLayers = -1;
     public Color targetHighlightColor = Color.red;
 
+    [Header("自动巡航模块设置")]
+    public float autoCruiseDistance = 5f;        // 自动巡航保持距离
+    public float autoCruiseSpeed = 8f;           // 自动巡航速度
+    public float autoCruiseAcceleration = 2f;    // 自动巡航加速度
+    public float autoCruiseDeceleration = 3f;    // 自动巡航减速度
+    public float autoCruiseRotationSpeed = 3f;   // 自动巡航旋转速度
+
     [Header("速度同步模块设置")]
     public float syncCooldown = 2f;
     public float syncSpeed = 2f;
@@ -82,6 +89,10 @@ public class AstronautData : MonoBehaviour
     public ControlMode currentControlMode = ControlMode.Space;
     public Transform gravitySource;
     public float groundDistance;
+    public bool isAutoCruising;                  // 是否正在自动巡航
+    public Vector3 autoCruiseTargetPosition;     // 自动巡航目标位置
+    public Vector3 autoCruiseDirection;          // 自动巡航方向
+    public float autoCruiseCurrentSpeed;         // 当前自动巡航速度
 }
 
 /// <summary>
