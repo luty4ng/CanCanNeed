@@ -59,6 +59,20 @@ namespace PlayerController.Modules
             Data.isSyncRequested = Input.GetKey(KeyCode.Space) && Data.currentTarget != null;
             Data.isStabilizeRequested = Input.GetKey(KeyCode.Space) && !Data.isOnGround;
             Data.isJumpingRequested = Input.GetKey(KeyCode.Space) && Data.isOnGround && Data.isInGravityField;
+            
+            // 检测自动巡航请求 (X键用于自动巡航)
+            if (Input.GetKeyDown(KeyCode.X) && Data.currentTarget != null)
+            {
+                Data.isAutoCruising = !Data.isAutoCruising;
+                if (Data.isAutoCruising)
+                {
+                    Debug.Log("开始自动巡航");
+                }
+                else
+                {
+                    Debug.Log("停止自动巡航");
+                }
+            }
         }
         
         public override void OnDestroy()

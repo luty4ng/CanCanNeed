@@ -48,6 +48,19 @@ namespace PlayerController.Modules.MotionStates
         {
             if (Data.currentFuel <= 0) return;
 
+            // 在自动巡航状态下，禁用手动移动控制
+            if (Data.isAutoCruising)
+            {
+                // 如果之前在使用推进器，现在停止
+                if (m_wasThrusterActive)
+                {
+                    m_wasThrusterActive = false;
+                    Data.isUsingThrusters = false;
+                    AstronautEvents.TriggerThrusterStateChanged(false);
+                }
+                return;
+            }
+
             bool isUsingThrusters = Data.moveInput.magnitude > 0.1f;
             
             if (isUsingThrusters != m_wasThrusterActive)
@@ -84,7 +97,8 @@ namespace PlayerController.Modules.MotionStates
         
         private void HandleAutoStop()
         {
-            if (Data.isUsingThrusters || Data.isSyncing) return;
+            // 如果玩家正在使用推进器、正在同步速度或正在自动巡航，不应用自动停止
+            if (Data.isUsingThrusters || Data.isSyncing || Data.isAutoCruising) return;
             
             Vector3 currentVelocity = Data.rb.velocity;
             float currentSpeed = currentVelocity.magnitude;
@@ -105,6 +119,27 @@ namespace PlayerController.Modules.MotionStates
         private void HandleRotation()
         {
             if (Data.currentFuel <= 0) return;
+
+            // 在自动巡航状态下，相机可以移动但不改变朝向
+            if (Data.isAutoCruising)
+            {
+                // 允许相机在自动巡航时进行有限的视角调整，但不影响朝向
+                if (!Data.isRolling)
+                {
+                    // 只允许小幅度的视角调整，不影响整体朝向
+                    float limitedLookX = Data.lookInput.x * 0.1f; // 限制旋转幅度
+                    float limitedLookY = Data.lookInput.y * 0.1f;
+                    
+                    Data.rb.transform.Rotate(Vector3.up * limitedLookX);
+                    Data.rb.transform.Rotate(Vector3.right * -limitedLookY);
+                }
+                else
+                {
+                    // 视线轴旋转模式在自动巡航时完全禁用
+                    // 不执行任何旋转操作
+                }
+                return;
+            }
 
             if (!Data.isRolling)
             {

@@ -45,6 +45,11 @@ public static class AstronautEvents
     // 控制模式切换事件
     public static event Action<ControlMode> OnControlModeChanged;      // 控制模式变化
     
+    // 自动巡航事件
+    public static event Action<GameObject> OnAutoCruiseStarted;        // 开始自动巡航
+    public static event Action OnAutoCruiseStopped;                    // 停止自动巡航
+    public static event Action<float> OnAutoCruiseDistanceChanged;     // 自动巡航距离变化
+    
     // 触发事件的方法
     public static void TriggerFuelChanged(float current, float max)
     {
@@ -167,5 +172,21 @@ public static class AstronautEvents
     public static void TriggerControlModeChanged(ControlMode newMode)
     {
         OnControlModeChanged?.Invoke(newMode);
+    }
+    
+    // 自动巡航事件触发方法
+    public static void TriggerAutoCruiseStarted(GameObject target)
+    {
+        OnAutoCruiseStarted?.Invoke(target);
+    }
+    
+    public static void TriggerAutoCruiseStopped()
+    {
+        OnAutoCruiseStopped?.Invoke();
+    }
+    
+    public static void TriggerAutoCruiseDistanceChanged(float distance)
+    {
+        OnAutoCruiseDistanceChanged?.Invoke(distance);
     }
 }
