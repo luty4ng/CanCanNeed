@@ -20,12 +20,24 @@ Shader "Custom/CartoonPlanet"
         _AtmosphereIntensity ("Atmosphere Intensity", Range(0, 3)) = 1.5
         _AtmosphereFalloff ("Atmosphere Falloff", Range(0.5, 5)) = 2.0
         
-        [Header(Lighting)]
+        [Header(Toon Lighting)]
+        [HDR]
+        _AmbientColor("Ambient Color", Color) = (0.4,0.4,0.4,1)
         _ToonSteps ("Toon Lighting Steps", Range(2, 8)) = 4
         _LightIntensity ("Light Intensity", Range(0.5, 2)) = 1.2
-        _ShadowSoftness ("Shadow Softness", Range(0.01, 0.3)) = 0.1
+        _ShadowSoftness ("Shadow Softness", Range(0.001, 0.1)) = 0.005
+        
+        [Header(Specular)]
+        [HDR]
+        _SpecularColor("Specular Color", Color) = (0.9,0.9,0.9,1)
+        _Glossiness("Glossiness", Float) = 32
+        _SpecularSoftness("Specular Softness", Range(0.001, 0.1)) = 0.005
+        
+        [Header(Rim Lighting)]
+        [HDR]
         _RimLightColor ("Rim Light Color", Color) = (1.0, 0.8, 0.6, 1)
-        _RimLightIntensity ("Rim Light Intensity", Range(0, 3)) = 1.0
+        _RimAmount("Rim Amount", Range(0, 1)) = 0.716
+        _RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
         
         [Header(Animation)]
         _RotationSpeed ("Rotation Speed", Range(0, 2)) = 0.1
@@ -91,9 +103,12 @@ Shader "Custom/CartoonPlanet"
             half _PatternScale, _PatternContrast, _PatternSharpness, _NoiseIntensity;
             half4 _AtmosphereColor;
             half _AtmosphereThickness, _AtmosphereIntensity, _AtmosphereFalloff;
+            half4 _AmbientColor;
             half _ToonSteps, _LightIntensity, _ShadowSoftness;
+            half4 _SpecularColor;
+            half _Glossiness, _SpecularSoftness;
             half4 _RimLightColor;
-            half _RimLightIntensity;
+            half _RimAmount, _RimThreshold;
             half _RotationSpeed, _AtmosphereSpeed, _PulseIntensity;
             half _EmissionIntensity, _Metallic, _Smoothness;
             half _ColorSteps, _Saturation, _Contrast, _Brightness, _CartoonStrength;
@@ -161,19 +176,39 @@ Shader "Custom/CartoonPlanet"
                 return landColor;
             }
             
-            // 改进的卡通光照函数 - 减少条纹效果
-            float toonLighting(float dotNL) {
-                // 先进行基础的smoothstep处理
-                dotNL = smoothstep(0.1, 0.9, dotNL); // 预处理让光照更平滑
+            // 基于Roystan风格的卡通光照函数
+            float toonLighting(float NdotL) {
+                // 使用smoothstep创建清晰的光暗分界，参考Roystan shader
+                float lightIntensity = smoothstep(0, _ShadowSoftness, NdotL);
+                return lightIntensity;
+            }
+            
+            // 卡通风格高光计算
+            float toonSpecular(float3 normal, float3 lightDir, float3 viewDir, float lightIntensity) {
+                // 计算半向量用于Blinn-Phong高光
+                float3 halfVector = normalize(lightDir + viewDir);
+                float NdotH = dot(normal, halfVector);
                 
-                // 然后应用分层，但使用更柔和的过渡
-                float stepped = floor(dotNL * _ToonSteps) / _ToonSteps;
-                float nextStep = floor(dotNL * _ToonSteps + 1.0) / _ToonSteps;
+                // 应用光泽度，平方以允许艺术家使用更小的值
+                float specularIntensity = pow(NdotH * lightIntensity, _Glossiness * _Glossiness);
                 
-                // 在分层之间使用平滑插值，减少硬边缘
-                float smoothFactor = _ShadowSoftness * 2.0; // 增加柔和度
-                return lerp(stepped, nextStep, smoothstep(stepped + (1.0/_ToonSteps) - smoothFactor, 
-                                                        stepped + (1.0/_ToonSteps) + smoothFactor, dotNL));
+                // 使用smoothstep创建清晰的高光边缘
+                float specularIntensitySmooth = smoothstep(0.005, _SpecularSoftness, specularIntensity);
+                
+                return specularIntensitySmooth;
+            }
+            
+            // 改进的卡通风格边缘光照
+            float toonRimLighting(float3 normal, float3 viewDir, float NdotL) {
+                float rimDot = 1.0 - dot(viewDir, normal);
+                
+                // 只在受光面显示边缘光，使用NdotL的幂次来平滑混合
+                float rimIntensity = rimDot * pow(NdotL, _RimThreshold);
+                
+                // 使用smoothstep创建清晰的边缘光边界
+                rimIntensity = smoothstep(_RimAmount - 0.01, _RimAmount + 0.01, rimIntensity);
+                
+                return rimIntensity;
             }
             
             // RGB to HSV conversion
@@ -262,23 +297,28 @@ Shader "Custom/CartoonPlanet"
                 // Generate surface colors
                 float3 surfaceColor = generatePlanetSurface(input.uv, input.positionWS);
                 
-                // Toon lighting calculation
-                float dotNL = dot(normalWS, lightDir);
-                float toonLight = toonLighting(dotNL * 0.5 + 0.5);
+                // 基于Roystan风格的卡通光照计算
+                float NdotL = dot(normalWS, lightDir);
                 
-                // Apply lighting with cartoon style
-                float3 lighting = mainLight.color * toonLight * _LightIntensity;
-                float3 ambient = SampleSH(normalWS) * 0.3;
+                // 主要光照计算 - 使用改进的toon lighting
+                float lightIntensity = toonLighting(NdotL);
+                float3 light = lightIntensity * mainLight.color * _LightIntensity;
                 
-                // Rim lighting for cartoon effect
-                float rimDot = 1.0 - dot(normalWS, viewDir);
-                float rimLight = pow(rimDot, 3.0) * _RimLightIntensity;
-                float3 rimColor = _RimLightColor.rgb * rimLight;
+                // 环境光照
+                float3 ambient = _AmbientColor.rgb;
                 
-                // Combine lighting
-                float3 finalColor = surfaceColor * (lighting + ambient) + rimColor;
+                // 高光计算
+                float specular = toonSpecular(normalWS, lightDir, viewDir, lightIntensity);
+                float3 specularColor = specular * _SpecularColor.rgb;
                 
-                // Add subtle emission and pulse
+                // 改进的边缘光照
+                float rim = toonRimLighting(normalWS, viewDir, NdotL);
+                float3 rimColor = rim * _RimLightColor.rgb;
+                
+                // 组合所有光照效果
+                float3 finalColor = surfaceColor * (light + ambient) + specularColor + rimColor;
+                
+                // 添加脉冲发光效果
                 float pulse = 1.0 + sin(_Time.y * 2.0) * _PulseIntensity * 0.1;
                 finalColor += surfaceColor * _EmissionIntensity * 0.1 * pulse;
                 
@@ -296,7 +336,6 @@ Shader "Custom/CartoonPlanet"
                 finalColor = lerp(finalColor, _OutlineColor.rgb, outlineFactor * _OutlineColor.a * _CartoonStrength);
                 
                 // 最终的颜色增强 - 根据卡通强度调整
-                float enhanceStrength = _CartoonStrength * 0.5 + 0.5; // 0.5到1.0之间
                 finalColor = pow(finalColor, lerp(1.0, 0.8, _CartoonStrength)); // 条件性提亮
                 finalColor = saturate(finalColor * lerp(1.0, 1.1, _CartoonStrength)); // 条件性过曝
                 

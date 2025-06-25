@@ -26,28 +26,28 @@ Material:
     m_Ints: []
     m_Floats:
     - _BackgroundIntensity: 2
-    - _ColorVariation: 0.3
-    - _CosmicRayCount: 8
+    - _ColorVariation: 0.294
+    - _CosmicRayCount: 3.6
     - _CosmicRayIntensity: 1.5
     - _DustDensity: 400
     - _DustIntensity: 0.4
-    - _DustSpeed: 0.3
+    - _DustSpeed: 0.289
     - _GlobalAnimationSpeed: 1
     - _GradientPower: 1.8
-    - _NebulaCoverage: 0.4
-    - _NebulaIntensity: 1.5
-    - _NebulaScale: 3
-    - _NebulaSpeed: 0.2
+    - _NebulaCoverage: 0.462
+    - _NebulaIntensity: 0.92
+    - _NebulaScale: 0.71
+    - _NebulaSpeed: 0.3
     - _NoiseQuality: 4
     - _PulseIntensity: 0.2
     - _Seed: 123
-    - _StarBrightness: 2.5
-    - _StarDensity: 150
-    - _StarFlareIntensity: 1.8
-    - _StarMovementRange: 0.3
-    - _StarMovementSpeed: 0.1
-    - _StarSize: 0.015
-    - _ThemeIntensity: 1.5
+    - _StarBrightness: 0.89
+    - _StarDensity: 133
+    - _StarFlareIntensity: 2.65
+    - _StarMovementRange: 0.222
+    - _StarMovementSpeed: 0.95
+    - _StarSize: 0.0122
+    - _ThemeIntensity: 0.79
     m_Colors:
     - _ThemeColor: {r: 0, g: 0.5984249, b: 1, a: 1}
   m_BuildTextureStacks: []
