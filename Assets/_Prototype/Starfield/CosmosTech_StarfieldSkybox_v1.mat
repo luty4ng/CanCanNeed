@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CosmosTech_StarfieldSkybox
+  m_Name: CosmosTech_StarfieldSkybox_v1
   m_Shader: {fileID: 4800000, guid: 66f72c30127a8bb47b1609f28fe73e3d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

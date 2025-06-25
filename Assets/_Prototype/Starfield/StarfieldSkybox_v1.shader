@@ -201,7 +201,7 @@ Shader "CosmosTech/StarfieldSkybox"
                 
                 // 天空盒顶点处理
                 float4 pos = IN.positionOS;
-                OUT.positionHCS = mul(UNITY_MATRIX_VP, mul(unity_ObjectToWorld, pos)).xyww;
+                OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.rayDir = normalize(mul(unity_ObjectToWorld, pos).xyz);
                 
                 return OUT;

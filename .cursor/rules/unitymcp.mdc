@@ -1,0 +1,207 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Unity MCP (Model Context Protocol) 使用规则
+
+## 概述
+Unity MCP 提供了一套强大的工具，允许AI助手直接与Unity编辑器交互，执行各种开发任务。这些工具大大提高了Unity开发的效率和自动化程度。
+
+## 重要注意事项
+- 所有MCP生成的资源，只能放置在`Assets/_MCPGen/` 目录下
+
+## 可用的MCP工具
+
+### 1. 菜单操作工具
+**`mcp_mcp-unity_execute_menu_item`**
+- **功能**: 执行Unity编辑器菜单项
+- **参数**: `menuPath` - 菜单路径（如："GameObject/Create Empty"）
+- **使用场景**: 
+  - 创建GameObject
+  - 执行编辑器命令
+  - 访问Unity内置功能
+
+**使用示例**:
+```
+创建空GameObject: "GameObject/Create Empty"
+创建Cube: "GameObject/3D Object/Cube"
+打开包管理器: "Window/Package Manager"
+```
+
+### 2. GameObject选择工具
+**`mcp_mcp-unity_select_gameobject`**
+- **功能**: 选择场景中的GameObject
+- **参数**: 
+  - `objectPath` - GameObject路径或名称
+  - `instanceId` - GameObject实例ID
+- **使用场景**: 在场景中定位和选择特定对象
+
+### 3. 包管理工具
+**`mcp_mcp-unity_add_package`**
+- **功能**: 向Unity包管理器添加包
+- **参数**:
+  - `source` - 包源（registry/github/disk）
+  - `packageName` - 包名（用于registry）
+  - `repositoryUrl` - GitHub仓库URL
+  - `version` - 包版本
+  - `branch` - GitHub分支
+  - `path` - 本地路径
+- **使用场景**: 自动化包安装和依赖管理
+
+**使用示例**:
+```
+Registry包: source="registry", packageName="com.unity.textmeshpro"
+GitHub包: source="github", repositoryUrl="https://github.com/username/repo.git"
+本地包: source="disk", path="/path/to/package"
+```
+
+### 4. 测试运行工具
+**`mcp_mcp-unity_run_tests`**
+- **功能**: 运行Unity测试框架测试
+- **参数**:
+  - `testMode` - 测试模式（EditMode/PlayMode）
+  - `testFilter` - 测试过滤器
+  - `returnOnlyFailures` - 仅返回失败测试
+  - `returnWithLogs` - 返回测试日志
+- **使用场景**: 自动化测试执行和结果分析
+
+### 5. 控制台工具
+**`mcp_mcp-unity_send_console_log`**
+- **功能**: 向Unity控制台发送日志消息
+- **参数**:
+  - `message` - 日志消息
+  - `type` - 日志类型（info/warning/error）
+
+**`mcp_mcp-unity_get_console_logs`**
+- **功能**: 获取Unity控制台日志
+- **参数**:
+  - `logType` - 日志类型过滤
+  - `limit` - 返回日志数量限制
+  - `offset` - 分页偏移
+  - `includeStackTrace` - 是否包含堆栈跟踪
+
+### 6. 组件操作工具
+**`mcp_mcp-unity_update_component`**
+- **功能**: 更新或添加GameObject组件
+- **参数**:
+  - `componentName` - 组件名称
+  - `instanceId` - GameObject实例ID
+  - `objectPath` - GameObject路径
+  - `componentData` - 组件数据字段
+- **使用场景**: 动态修改组件属性和配置
+
+### 7. 资源管理工具
+**`mcp_mcp-unity_add_asset_to_scene`**
+- **功能**: 将资源添加到场景中
+- **参数**:
+  - `assetPath` - 资源路径
+  - `guid` - 资源GUID
+  - `position` - 场景位置
+  - `parentId` - 父对象ID
+  - `parentPath` - 父对象路径
+
+### 8. GameObject更新工具
+**`mcp_mcp-unity_update_gameobject`**
+- **功能**: 更新GameObject属性
+- **参数**:
+  - `instanceId` - GameObject实例ID
+  - `objectPath` - GameObject路径
+  - `gameObjectData` - GameObject数据
+    - `name` - 名称
+    - `activeSelf` - 激活状态
+    - `isStatic` - 静态标记
+    - `layer` - 图层
+    - `tag` - 标签
+
+## 使用最佳实践
+
+### 1. 错误处理和日志记录
+- 使用 `send_console_log` 记录操作过程
+- 定期检查 `get_console_logs` 获取错误信息
+- 设置 `includeStackTrace=false` 节省Token使用
+
+### 2. 测试驱动开发
+- 使用 `run_tests` 验证代码更改
+- 优先运行EditMode测试，性能更快
+- 使用 `returnOnlyFailures=true` 关注失败的测试
+
+### 3. 场景管理
+- 通过 `objectPath` 而非 `instanceId` 引用GameObject，提高可维护性
+- 使用层次化的GameObject路径命名
+- 定期使用 `select_gameobject` 验证对象存在性
+
+### 4. 包管理策略
+- 优先使用Unity Registry的稳定包
+- 对于GitHub包，指定具体的版本或分支
+- 本地包用于开发和测试自定义包
+
+### 5. 性能优化
+- 批量操作时避免频繁的工具调用
+- 使用适当的日志级别和过滤器
+- 限制返回数据的大小以节省Token
+
+## 工作流程示例
+
+### 创建和配置GameObject
+```
+1. execute_menu_item("GameObject/Create Empty") - 创建空对象
+2. update_gameobject(name="Player", layer=8) - 设置属性
+3. update_component("Rigidbody", {mass: 1.0, useGravity: true}) - 添加组件
+4. send_console_log("Player对象创建完成", "info") - 记录日志
+```
+
+### 自动化测试工作流
+```
+1. run_tests(testMode="EditMode", returnOnlyFailures=true) - 运行测试
+2. get_console_logs(logType="error", limit=10) - 检查错误
+3. send_console_log("测试执行完成", "info") - 记录结果
+```
+
+### 包安装和验证
+```
+1. add_package(source="registry", packageName="com.unity.textmeshpro") - 安装包
+2. get_console_logs(limit=5) - 检查安装日志
+3. execute_menu_item("Window/Package Manager") - 打开包管理器验证
+```
+
+## 注意事项和限制
+
+### Token使用优化
+- `get_console_logs` 默认 `includeStackTrace=true`，建议设为 `false` 节省80-90%的Token
+- 合理设置 `limit` 参数避免过多数据返回
+- 使用适当的日志类型过滤
+
+### 异步操作处理
+- Unity编辑器操作可能是异步的，需要适当等待
+- 使用日志检查操作完成状态
+- 对于长时间操作，分步骤执行并验证
+
+### 权限和安全
+- MCP工具直接操作Unity编辑器，具有完全访问权限
+- 谨慎执行可能影响项目的操作
+- 建议在测试环境中验证复杂操作
+
+### 跨平台兼容性
+- 路径分隔符在不同操作系统可能不同
+- GameObject路径使用Unity标准的"/"分隔符
+- 文件路径遵循目标平台约定
+
+## 调试和故障排除
+
+### 常见问题诊断
+1. **GameObject未找到**: 检查路径拼写和层次结构
+2. **组件更新失败**: 验证组件名称和字段名称正确性
+3. **包安装失败**: 检查网络连接和包源可用性
+4. **测试执行错误**: 查看控制台日志详细错误信息
+
+### 调试工具链
+```
+1. get_console_logs() - 获取最新日志
+2. select_gameobject() - 验证对象存在
+3. send_console_log() - 添加调试标记
+4. run_tests() - 验证功能正确性
+```
+
+这个MCP工具集为Unity开发提供了强大的自动化能力，正确使用可以显著提高开发效率和代码质量。
+

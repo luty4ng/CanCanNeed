@@ -536,7 +536,7 @@ namespace PlayerController.Modules
             // 加速
             m_AutoCruiseCurrentSpeed += Data.autoCruiseAcceleration * Time.deltaTime;
             m_AutoCruiseCurrentSpeed = Mathf.Min(m_AutoCruiseCurrentSpeed, Data.autoCruiseSpeed);
-            Data.autoCruiseCurrentSpeed = m_AutoCruiseCurrentSpeed; // 同步到Data
+            Data.autoCruiseCurrentSpeed = m_AutoCruiseCurrentSpeed;
 
             // 应用速度
             Data.rb.velocity = directionToTarget * m_AutoCruiseCurrentSpeed;
