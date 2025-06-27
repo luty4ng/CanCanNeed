@@ -26,34 +26,60 @@ Material:
     m_Ints: []
     m_Floats:
     - _AtmosphereFalloff: 2
-    - _AtmosphereIntensity: 1.5
+    - _AtmosphereGlow: 1.2
+    - _AtmosphereIntensity: 1.8112569
     - _AtmosphereSpeed: 0.3
     - _AtmosphereThickness: 0.1
-    - _Brightness: 1.1
-    - _CartoonStrength: 0.7
-    - _ColorSteps: 8
-    - _Contrast: 1.2
-    - _EmissionIntensity: 0.3
-    - _LightIntensity: 1.2
-    - _Metallic: 0.1
-    - _NoiseIntensity: 0.3
-    - _OutlineThickness: 0.02
+    - _Brightness: 1.242
+    - _CartoonStrength: 0.504
+    - _CloudDensity: 0.4
+    - _CloudSpeed: 0.2
+    - _ColorQuantization: 6
+    - _ColorSteps: 7.9
+    - _Contrast: 0.9
+    - _EmissionIntensity: 0.79
+    - _Glossiness: 32
+    - _LightIntensity: 0.96
+    - _LightWrap: 0.2
+    - _Metallic: 0.56
+    - _NoiseIntensity: 0.20753872
+    - _OceanLevel: 0.3
+    - _OutlineSoftness: 0.01
+    - _OutlineThickness: 0.0362
+    - _OutlineWidth: 0.01
     - _PatternContrast: 1.5
-    - _PatternScale: 8
+    - _PatternScale: 12.164592
     - _PatternSharpness: 2
     - _PulseIntensity: 0.2
+    - _PulseSpeed: 1
+    - _RimAmount: 0.859
+    - _RimIntensity: 1.08
     - _RimLightIntensity: 1
-    - _RotationSpeed: 0.1
-    - _Saturation: 1.3
+    - _RimPower: 3.66
+    - _RimSmoothness: 0.0119
+    - _RimThreshold: 0.607
+    - _RotationSpeed: 0.18015416
+    - _Saturation: 1.28
     - _ShadowSoftness: 0.1
-    - _Smoothness: 0.6
-    - _ToonSteps: 4
+    - _ShadowStrength: 0.8
+    - _Smoothness: 0.638
+    - _SpecularSize: 0.712
+    - _SpecularSmoothness: 0.0386
+    - _SpecularSoftness: 0.1
+    - _SpecularSteps: 2.07
+    - _ToonSmoothness: 0.01
+    - _ToonSteps: 4.94
     m_Colors:
-    - _AccentColor: {r: 1, g: 0.9, b: 0.39999998, a: 1}
-    - _AtmosphereColor: {r: 0.39999998, g: 0.8, b: 1, a: 1}
-    - _BaseColor: {r: 0.29999998, g: 0.8, b: 0.5, a: 1}
+    - _AccentColor: {r: 1, g: 0.89759594, b: 0.28317165, a: 1}
+    - _AmbientColor: {r: 0.11320752, g: 0.11320752, b: 0.11320752, a: 1}
+    - _AtmosphereColor: {r: 0.41090852, g: 0.8036364, b: 1, a: 1}
+    - _BaseColor: {r: 0.390483, g: 0.54269284, b: 0.42853546, a: 1}
+    - _OceanColor: {r: 0.09999997, g: 0.29999998, b: 0.7, a: 1}
     - _OutlineColor: {r: 0.09999997, g: 0.09999997, b: 0.09999997, a: 1}
-    - _PoleColor: {r: 0.9, g: 0.9, b: 1, a: 1}
-    - _RimLightColor: {r: 1, g: 0.8, b: 0.6, a: 1}
-    - _SecondaryColor: {r: 0.09999997, g: 0.6, b: 0.29999998, a: 1}
+    - _PoleColor: {r: 0.5854026, g: 0.7233987, b: 0.61990166, a: 1}
+    - _RimColor: {r: 1, g: 0.8, b: 0.6, a: 1}
+    - _RimLightColor: {r: 0.7000671, g: 0.8471862, b: 0.6353376, a: 1}
+    - _SecondaryColor: {r: 0.25621927, g: 0.5332557, b: 0.32547835, a: 1}
+    - _ShadowColor: {r: 0.19999996, g: 0.19999996, b: 0.29999998, a: 1}
+    - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
