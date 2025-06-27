@@ -19,7 +19,8 @@ namespace PlayerController.Modules
 
         #region 自动定向相关字段
         private bool m_IsAutoAiming = false;
-        private float m_AutoAimSpeed = 5f; // 可调节对准速度
+        [SerializeField] private float m_AutoAimSpeed = 5f; // 可调节对准速度
+        [SerializeField] private float m_AutoAimThreshold = 0.5f; // 对准完成阈值
         #endregion
 
         #region 自动巡航相关字段
@@ -42,21 +43,14 @@ namespace PlayerController.Modules
             if (!Enabled || Data?.playerCamera == null) return;
 
             HandleTargeting();
-            
+
             if (Input.GetMouseButtonDown(1) && Data.currentTarget != null)
             {
                 UnselectTarget();
             }
 
-            // 自动定向逻辑
-            if (Input.GetKeyDown(KeyCode.F) && Data.currentTarget != null)
-            {
-                m_IsAutoAiming = true;
-            }
-            if (m_IsAutoAiming)
-            {
-                AutoAimToTarget();
-            }
+            // 改进的自动定向逻辑
+            HandleAutoAiming();
 
             // 自动巡航逻辑
             HandleAutoCruise();
@@ -91,7 +85,7 @@ namespace PlayerController.Modules
         public void UnselectTarget()
         {
             m_IsAutoAiming = false; // 取消自动对准
-            
+
             if (Data?.currentTarget == null) return;
 
             if (Data.isSyncing)
@@ -209,7 +203,7 @@ namespace PlayerController.Modules
             if (Data.currentTarget == null) return;
 
             Data.targetRenderer = Data.currentTarget.GetComponent<Renderer>();
-            
+
             if (Data.targetRenderer != null)
             {
                 ApplyRendererHighlight(Data.targetRenderer);
@@ -229,10 +223,10 @@ namespace PlayerController.Modules
             if (renderer == null) return;
 
             Data.originalMaterial = renderer.material;
-            
+
             Material newMaterial = new Material(Data.originalMaterial);
             Data.originalColor = newMaterial.color;
-            
+
             newMaterial.color = Data.targetHighlightColor;
             renderer.material = newMaterial;
         }
@@ -305,7 +299,7 @@ namespace PlayerController.Modules
         }
 
         /// <summary>
-        /// 自动将玩家yaw和相机pitch缓慢对准已选中的目标
+        /// 统一的自动对准功能 - 对准目标方向并归零相机旋转
         /// </summary>
         private void AutoAimToTarget()
         {
@@ -314,45 +308,115 @@ namespace PlayerController.Modules
                 m_IsAutoAiming = false;
                 return;
             }
-
+            
             Vector3 targetPos = Data.currentTarget.transform.position;
             Vector3 playerPos = Data.transform.position;
             Vector3 dirToTarget = (targetPos - playerPos).normalized;
 
-            // 1. 只调整玩家本体的yaw（Y轴）
-            Vector3 flatDir = new Vector3(dirToTarget.x, 0, dirToTarget.z);
-            if (flatDir.sqrMagnitude > 0.0001f)
+            // 使用通用对准方法
+            bool isComplete = AlignToDirection(dirToTarget, m_AutoAimSpeed, m_AutoAimThreshold, true);
+            
+            if (isComplete)
             {
-                Quaternion targetYaw = Quaternion.LookRotation(flatDir, Vector3.up);
-                Data.transform.rotation = Quaternion.RotateTowards(
-                    Data.transform.rotation,
-                    targetYaw,
-                    m_AutoAimSpeed * Time.deltaTime * 100f
-                );
-            }
-
-            // 2. 只调整相机的pitch（X轴）
-            Transform camTransform = Data.playerCamera.transform;
-            Vector3 localTarget = Data.transform.InverseTransformPoint(targetPos);
-            float targetPitch = Mathf.Atan2(localTarget.y, new Vector2(localTarget.x, localTarget.z).magnitude) * Mathf.Rad2Deg;
-
-            // 取当前pitch
-            Vector3 camEuler = camTransform.localEulerAngles;
-            float currentPitch = camEuler.x;
-            if (currentPitch > 180f) currentPitch -= 360f;
-
-            // 插值到目标pitch
-            float newPitch = Mathf.MoveTowards(currentPitch, targetPitch, m_AutoAimSpeed * Time.deltaTime * 100f);
-            camTransform.localEulerAngles = new Vector3(newPitch, 0, 0);
-
-            // 判断是否已基本对准
-            float yawAngle = Quaternion.Angle(Data.transform.rotation, Quaternion.LookRotation(flatDir, Vector3.up));
-            float pitchAngle = Mathf.Abs(newPitch - targetPitch);
-            if (yawAngle < 0.5f && pitchAngle < 0.5f)
-            {
-                camTransform.localEulerAngles = new Vector3(targetPitch, 0, 0);
                 m_IsAutoAiming = false;
+                Debug.Log("自动对准完成 - 玩家和相机都已对准");
             }
+        }
+
+        /// <summary>
+        /// 自动巡航时的方向对准（复用自动对准逻辑）
+        /// </summary>
+        private void AlignDirectionToTarget()
+        {
+            if (Data.currentTarget == null) return;
+
+            Vector3 directionToTarget = (m_AutoCruiseTargetPosition - Data.transform.position).normalized;
+            
+            // 使用通用对准方法，但不归零相机
+            bool isComplete = AlignToDirection(directionToTarget, Data.autoCruiseRotationSpeed, 1f, false);
+            
+            if (isComplete)
+            {
+                m_HasAlignedDirection = true;
+                m_IsAccelerating = true;
+                Debug.Log("方向对准完成，开始加速");
+            }
+        }
+
+        /// <summary>
+        /// 通用对准方法
+        /// </summary>
+        /// <param name="direction">目标方向</param>
+        /// <param name="speed">对准速度</param>
+        /// <param name="threshold">完成阈值</param>
+        /// <param name="resetCamera">是否归零相机旋转</param>
+        /// <returns>是否对准完成</returns>
+        private bool AlignToDirection(Vector3 direction, float speed, float threshold, bool resetCamera)
+        {
+            if (direction.sqrMagnitude < 0.0001f) return false;
+
+            // 1. 调整玩家本体的yaw（Y轴）
+            Quaternion targetYaw = Quaternion.LookRotation(direction, Vector3.up);
+            Data.transform.rotation = Quaternion.RotateTowards(
+                Data.transform.rotation,
+                targetYaw,
+                speed * Time.deltaTime * 100f
+            );
+
+            // 2. 如果需要，将相机旋转逐步归零
+            bool cameraAligned = true;
+            if (resetCamera && Data.playerCamera != null)
+            {
+                cameraAligned = ResetCameraRotation(speed);
+            }
+
+            // 3. 检查是否完成
+            float yawAngle = Quaternion.Angle(Data.transform.rotation, targetYaw);
+            return yawAngle < threshold && cameraAligned;
+        }
+
+        /// <summary>
+        /// 归零相机旋转
+        /// </summary>
+        /// <param name="speed">归零速度</param>
+        /// <returns>是否归零完成</returns>
+        private bool ResetCameraRotation(float speed)
+        {
+            Transform camTransform = Data.playerCamera.transform;
+            Vector3 currentCamLocalEuler = camTransform.localEulerAngles;
+            
+            // 处理角度范围（将超过180度的角度转换为负值）
+            float currentPitch = currentCamLocalEuler.x;
+            if (currentPitch > 180f) currentPitch -= 360f;
+            
+            float currentYaw = currentCamLocalEuler.y;
+            if (currentYaw > 180f) currentYaw -= 360f;
+            
+            float currentRoll = currentCamLocalEuler.z;
+            if (currentRoll > 180f) currentRoll -= 360f;
+
+            // 逐步归零相机旋转
+            float newPitch = Mathf.MoveTowards(currentPitch, 0f, speed * Time.deltaTime * 100f);
+            float newYaw = Mathf.MoveTowards(currentYaw, 0f, speed * Time.deltaTime * 100f);
+            float newRoll = Mathf.MoveTowards(currentRoll, 0f, speed * Time.deltaTime * 100f);
+
+            camTransform.localEulerAngles = new Vector3(newPitch, newYaw, newRoll);
+
+            // 检查是否归零完成
+            float camPitchAngle = Mathf.Abs(newPitch);
+            float camYawAngle = Mathf.Abs(newYaw);
+            float camRollAngle = Mathf.Abs(newRoll);
+            
+            bool isComplete = camPitchAngle < m_AutoAimThreshold && 
+                             camYawAngle < m_AutoAimThreshold && 
+                             camRollAngle < m_AutoAimThreshold;
+            
+            if (isComplete)
+            {
+                camTransform.localEulerAngles = Vector3.zero;
+            }
+            
+            return isComplete;
         }
 
         /// <summary>
@@ -489,30 +553,6 @@ namespace PlayerController.Modules
         }
 
         /// <summary>
-        /// 对准目标方向
-        /// </summary>
-        private void AlignDirectionToTarget()
-        {
-            Vector3 directionToTarget = (m_AutoCruiseTargetPosition - Data.transform.position).normalized;
-            Quaternion targetRotation = Quaternion.LookRotation(directionToTarget, Data.transform.up);
-            
-            Data.transform.rotation = Quaternion.RotateTowards(
-                Data.transform.rotation,
-                targetRotation,
-                Data.autoCruiseRotationSpeed * Time.deltaTime * 100f
-            );
-
-            float angle = Quaternion.Angle(Data.transform.rotation, targetRotation);
-            if (angle < 1f)
-            {
-                Data.transform.rotation = targetRotation;
-                m_HasAlignedDirection = true;
-                m_IsAccelerating = true;
-                Debug.Log("方向对准完成，开始加速");
-            }
-        }
-
-        /// <summary>
         /// 加速向目标前进
         /// </summary>
         private void AccelerateToTarget()
@@ -542,7 +582,6 @@ namespace PlayerController.Modules
             Data.rb.velocity = directionToTarget * m_AutoCruiseCurrentSpeed;
         }
 
-
         /// <summary>
         /// 减速到目标位置
         /// </summary>
@@ -550,15 +589,15 @@ namespace PlayerController.Modules
         {
             Vector3 directionToTarget = (m_AutoCruiseTargetPosition - Data.transform.position).normalized;
             float distanceToTarget = Vector3.Distance(Data.transform.position, m_AutoCruiseTargetPosition);
-            
+
             // 减速
             m_AutoCruiseCurrentSpeed -= Data.autoCruiseDeceleration * Time.deltaTime;
             m_AutoCruiseCurrentSpeed = Mathf.Max(m_AutoCruiseCurrentSpeed, 0f);
             Data.autoCruiseCurrentSpeed = m_AutoCruiseCurrentSpeed; // 同步到Data
-            
+
             // 应用速度
             Data.rb.velocity = directionToTarget * m_AutoCruiseCurrentSpeed;
-            
+
             Debug.Log(m_AutoCruiseCurrentSpeed);
             // 检查是否到达目标位置
             if (distanceToTarget < 5f && m_AutoCruiseCurrentSpeed < 0.1f)
@@ -568,6 +607,32 @@ namespace PlayerController.Modules
                 m_IsAccelerating = false;
                 Data.isAutoCruising = false;
                 Debug.Log("自动巡航完成，已到达目标位置");
+            }
+        }
+
+        /// <summary>
+        /// 处理自动对准逻辑
+        /// </summary>
+        private void HandleAutoAiming()
+        {
+            // 按F键开始自动对准
+            if (Input.GetKeyDown(KeyCode.F) && Data.currentTarget != null)
+            {
+                m_IsAutoAiming = true;
+                Debug.Log("开始自动对准目标");
+            }
+
+            // 执行自动对准
+            if (m_IsAutoAiming)
+            {
+                AutoAimToTarget();
+            }
+
+            // 如果目标丢失，停止自动对准
+            if (m_IsAutoAiming && Data.currentTarget == null)
+            {
+                m_IsAutoAiming = false;
+                Debug.Log("目标丢失，停止自动对准");
             }
         }
         #endregion
