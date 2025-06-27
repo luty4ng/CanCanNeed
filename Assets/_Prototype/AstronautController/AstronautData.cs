@@ -60,6 +60,9 @@ public class AstronautData : MonoBehaviour
     public Color velocityGizmoColor = Color.blue;
     public Color syncGizmoColor = Color.yellow;
     public float gizmoThickness = 2f;
+    
+    [Header("库存模块设置")]
+    public int itemCapacity = 3;
 
     // 运行时状态
     [Header("运行时状态")]
@@ -93,6 +96,13 @@ public class AstronautData : MonoBehaviour
     public Vector3 autoCruiseTargetPosition;     // 自动巡航目标位置
     public Vector3 autoCruiseDirection;          // 自动巡航方向
     public float autoCruiseCurrentSpeed;         // 当前自动巡航速度
+
+    // 库存输入状态
+    [Header("库存输入状态")]
+    public bool isDropItemRequested = false; // G键
+    public bool isThrowItemCharging = false; // 是否正在蓄力
+    public bool isThrowItemRequested = false; // 松开左键
+    public float throwItemChargeTime = 0f;   // 蓄力时长
 }
 
 /// <summary>

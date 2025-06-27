@@ -73,6 +73,26 @@ namespace PlayerController.Modules
                     Debug.Log("停止自动巡航");
                 }
             }
+
+            // --- 库存相关输入 ---
+            // G键扔下物品
+            Data.isDropItemRequested = Input.GetKeyDown(KeyCode.G);
+            // 左键蓄力扔出
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Data.isThrowItemCharging = true;
+                Data.throwItemChargeTime = 0f;
+                Data.isThrowItemRequested = false;
+            }
+            if (Input.GetKey(KeyCode.Mouse0) && Data.isThrowItemCharging)
+            {
+                Data.throwItemChargeTime += Time.deltaTime;
+            }
+            if (Input.GetKeyUp(KeyCode.Mouse0) && Data.isThrowItemCharging)
+            {
+                Data.isThrowItemCharging = false;
+                Data.isThrowItemRequested = true;
+            }
         }
         
         public override void OnDestroy()

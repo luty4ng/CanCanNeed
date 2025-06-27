@@ -2,6 +2,7 @@ using PlayerController.Modules;
 using PlayerController.Modules.Gravity;
 using System.Collections.Generic;
 using UnityEngine;
+using Astronaut;
 
 /// <summary>
 /// 宇航员控制器 - 主MonoBehaviour组件
@@ -26,6 +27,7 @@ public class AstronautController : MonoBehaviour
     private DebugModule debugModule;
     private DetectionModule gravityDetectionModule;
     private GravityPhysicsModule gravityPhysicsModule;
+    private InventoryModule inventoryModule;
 
     #region Unity生命周期
     private void Awake()
@@ -95,6 +97,7 @@ public class AstronautController : MonoBehaviour
         debugModule = new DebugModule();
         gravityDetectionModule = new DetectionModule();
         gravityPhysicsModule = new GravityPhysicsModule();
+        inventoryModule = new InventoryModule();
 
         modules.Clear();
         modules.Add(inputModule);
@@ -106,6 +109,7 @@ public class AstronautController : MonoBehaviour
         modules.Add(debugModule);
         modules.Add(gravityDetectionModule);
         modules.Add(gravityPhysicsModule);
+        modules.Add(inventoryModule);
     }
     #endregion
 
@@ -194,6 +198,13 @@ public class AstronautController : MonoBehaviour
             return;
         }
         // 编辑器下可扩展
+    }
+
+    public void AddInventoryItem(GameObject prefab)
+    {
+        GameObject instance = Object.Instantiate(prefab);
+        if(!inventoryModule.AddItem(instance))
+            Destroy(instance);
     }
     #endregion
 }
